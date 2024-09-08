@@ -24,7 +24,8 @@
                             <p>{{ $post->content }}</p>
                         </div>
                         <div class="option p-3">
-                            @livewire('like', ['post' => $post->id])
+                            {{-- @livewire('like', ['post' => $post->id]) --}}
+                            @livewire('like-component', ['post' => $post->id])
                         </div>
                         <div class="option p-3">
                             @livewire('share-button', ['post' => $post->id])

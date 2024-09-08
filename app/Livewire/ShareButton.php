@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Auth;
 
 class ShareButton extends Component
 {
+    public $post;
+
+    public function mount(Post $post)
+    {
+        $this->post = $post;
+    }
 
     public function share()
     {
@@ -16,19 +22,34 @@ class ShareButton extends Component
         if (Auth::check()) {
             $user = Auth::user();
 
-            // Buat share baru
-            Share::create([
-                'user_id' => 1,
-                'post_id' => 1,
-            ]);
+            // Cek apakah user sudah pernah share post ini
+            $existingShare = Share::where('user_id', $user->id)
+                                  ->where('post_id', $this->post->id)
+                                  ->first();
 
-            session()->flash('message', 'Post shared successfully!');
+            if (!$existingShare) {
+                // Buat share baru
+                Share::create([
+                    'user_id' => $user->id,
+                    'post_id' => $this->post->id,
+                ]);
+
+                session()->flash('message', 'Post shared successfully!');
+            } else {
+                session()->flash('error', 'You have already shared this post.');
+            }
         } else {
             session()->flash('error', 'You need to login to share this post.');
         }
     }
+
     public function render()
     {
-        return view('livewire.share-button');
+        // Hitung total shares untuk post ini
+        $countShare = Share::where('post_id', $this->post->id)->count();
+
+        return view('livewire.share-button', [
+            'countShare' => $countShare
+        ]);
     }
 }
